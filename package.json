@@ -1,18 +1,23 @@
 {
-  "name": "fed-monitor-sdk",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build": "rollup -c"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@git.rongsitech.com:yangdong/fed-monitor-sdk.git"
-  },
-  "author": "Jesse",
-  "license": "ISC",
-  "dependencies": {
-    "rollup": "^2.33.1"
-  }
+	"name": "fed-monitor-sdk",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "rollup -c -w",
+		"build": "rollup -c",
+		"serve": "ws --port 9001"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@git.rongsitech.com:yangdong/fed-monitor-sdk.git"
+	},
+	"author": "Jesse",
+	"license": "ISC",
+	"dependencies": {
+		"rollup": "^2.33.1"
+	},
+	"devDependencies": {
+		"local-web-server": "^4.2.1"
+	}
 }
