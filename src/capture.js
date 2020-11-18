@@ -108,7 +108,6 @@ export function captureError(opt) {
 	const oldError = console.error;
 	console.error = function (e) {
 		let defaults = Object.assign({}, errorInfo);
-		console.log(e);
 		setTimeout(function () {
 			defaults.type = "console";
 			defaults.data = {
@@ -123,10 +122,18 @@ export function captureError(opt) {
 
 // 拦截xhr请求
 export function proxyXhr(opt) {
-	function ajaxEventTrigger(event) {
-		const ajaxEvent = new CustomEvent(event, { detail: this });
-		window.dispatchEvent(ajaxEvent);
+	function xhrEventTrigger(event) {
+		const xhrEvent = new CustomEvent(event, { detail: this });
+		window.dispatchEvent(xhrEvent);
 	}
+
+	const xhrProto = XMLHttpRequest.prototype;
+	const origOpen = xhrProto.open;
+	xhrProto.open = function (_, url) {
+		// 拿到请求地址
+		this._url = url;
+		return origOpen.apply(this, arguments);
+	};
 
 	const oldXHR = window.XMLHttpRequest;
 	function newXHR() {
@@ -134,52 +141,48 @@ export function proxyXhr(opt) {
 		realXHR.addEventListener(
 			"readystatechange",
 			function () {
-				ajaxEventTrigger.call(this, "ajaxReadyStateChange");
+				xhrEventTrigger.call(this, "xhrReadyStateChange");
 			},
 			false
 		);
 		return realXHR;
 	}
 
-	let gapTime = 0; // 计算请求延时
-	let startTime = 0;
 	window.XMLHttpRequest = newXHR;
-	window.addEventListener("ajaxReadyStateChange", function (e) {
-		var xhr = e.detail;
-		var status = xhr.status;
-		var readyState = xhr.readyState;
+	window.addEventListener("xhrReadyStateChange", function (e) {
+		const xhr = e.detail;
+		const status = xhr.status;
+		const readyState = xhr.readyState;
+		let startTime = 0;
+		let gapTime = 0;
 		if (readyState === 1) {
 			startTime = new Date().getTime();
 		}
 		if (readyState === 4) {
 			gapTime = new Date().getTime() - startTime;
 		}
-		/**
-		 * 上报请求信息
-		 */
+
 		if (readyState === 4) {
+			// 解决IE不支持xhr.responseURL
+			if (!xhr.responseURL) {
+				xhr.responseURL = xhr._url;
+			}
 			// 过滤请求
 			const result = opt.filterUrl.some(item => {
 				return xhr.responseURL.includes(item);
 			});
 			if (result) return false;
 
-			if (status === 200) {
-				// 接口正常响应时捕获接口响应耗时
-				let defaults = Object.assign({}, requestInfo);
-				(defaults.url = xhr.responseURL),
-					(defaults.statusCode = xhr.status),
-					(defaults.timeConsuming = gapTime),
-					conf.requestList.push(defaults);
-			} else if (status !== 401) {
-				// 接口异常时捕获异常接口及状态码
-				let defaults = Object.assign({}, requestInfo);
-				(defaults.url = xhr.responseURL),
-					(defaults.statusCode = xhr.status),
-					(defaults.timeConsuming = gapTime),
-					(defaults.responseMsg = xhr.responseText);
-				conf.requestList.push(defaults);
+			let defaults = Object.assign({}, requestInfo);
+			if (status !== 200 && status !== 401) {
+				// 接口异常时捕获异常接口响应
+				defaults.responseMsg = xhr.responseText;
 			}
+			defaults.url = xhr.responseURL;
+			defaults.statusCode = xhr.status;
+			defaults.timeConsuming = gapTime;
+			conf.requestList.push(defaults);
+
 			reportData(opt, "request");
 		}
 	});

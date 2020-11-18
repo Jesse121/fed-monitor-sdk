@@ -1,8 +1,11 @@
 import { captureError, proxyFetch, proxyXhr } from "./capture";
 import { reportData } from "./report";
+import polyfill from "./polyfill.js";
+
+polyfill();
 
 function main(option) {
-	let filterUrl = ["livereload.js?snipver=1", "/sockjs-node/"];
+	let filterUrl = ["livereload.js?snipver=1", "/sockjs-node/", "/api/report"];
 	let opt = {
 		// 上报地址
 		domain: "http://localhost/api",

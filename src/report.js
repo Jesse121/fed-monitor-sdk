@@ -15,7 +15,7 @@ function getPlatform() {
 	}
 }
 
-function clear(type = 0) {
+function clear(type) {
 	if (window.performance && window.performance.clearResourceTimings) performance.clearResourceTimings();
 	conf.performance = {};
 	conf.errorList = [];
@@ -65,15 +65,24 @@ export function reportData(opt, type) {
 		result = Object.assign(result, opt.add);
 		opt.fn && opt.fn(result);
 		if (!opt.fn && navigator.sendBeacon) {
-			navigator.sendBeacon(opt.domain, JSON.stringify(result));
+			// sendBeacon 如果成功进入浏览器的发送队列后，会返回true；
+			// 如果受到队列总数、数据大小的限制后，会返回false。
+			const res = navigator.sendBeacon(opt.domain, JSON.stringify(result));
+			if (!res) {
+				xhrReportData(opt.domain, result);
+			}
 		} else {
-			const xhr = new XMLHttpRequest();
-			xhr.open("POST", opt.domain, true);
-			xhr.send(JSON.stringify(result));
+			xhrReportData(opt.domain, result);
 		}
 		// 清空无关数据
 		Promise.resolve().then(() => {
-			clear();
+			clear(0);
 		});
 	}, opt.delay);
+}
+// 用于sendBeacon 降级支持
+function xhrReportData(url, data) {
+	const xhr = new XMLHttpRequest();
+	xhr.open("POST", url, true);
+	xhr.send(JSON.stringify(data));
 }
