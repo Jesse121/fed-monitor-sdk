@@ -11,6 +11,7 @@ const errorInfo = {
 };
 
 const requestInfo = {
+	method: "",
 	url: "",
 	statusCode: 0,
 	timeConsuming: 0,
@@ -23,28 +24,7 @@ export const conf = {
 	// 错误列表
 	errorList: [],
 	// 接口请求列表
-	requestList: [],
-
-	// 页面fetch数量
-	fetchNum: 0,
-	// ajax onload数量
-	loadNum: 0,
-	// 页面ajax数量
-	ajaxLength: 0,
-	// 页面fetch总数量
-	fetLength: 0,
-	// 页面ajax信息
-	ajaxMsg: {},
-	// ajax成功执行函数
-	goingType: "",
-	// 是否有ajax
-	haveAjax: false,
-	// 是否有fetch
-	haveFetch: false,
-	// 来自域名
-	preUrl: document.referrer && document.referrer !== location.href ? document.referrer : "",
-	// 当前页面
-	page: ""
+	requestList: []
 };
 
 // 捕获error信息
@@ -65,7 +45,7 @@ export function captureError(opt) {
 	// js
 	window.onerror = function (msg, _url, line, col, error) {
 		let defaults = Object.assign({}, errorInfo);
-		setTimeout(function () {
+		setTimeout(() => {
 			col = col || (window.event && window.event.errorCharacter) || 0;
 			defaults.type = "jsError";
 			defaults.data = {
@@ -76,7 +56,7 @@ export function captureError(opt) {
 			};
 			conf.errorList.push(defaults);
 			// 上报错误信息
-			if (conf.page === location.href) reportData(opt, "error");
+			reportData(opt, "error1");
 		}, 0);
 	};
 	window.addEventListener("unhandledrejection", function (e) {
@@ -102,19 +82,19 @@ export function captureError(opt) {
 			col
 		};
 		conf.errorList.push(defaults);
-		if (conf.page === location.href) reportData(opt, "error");
+		reportData(opt, "error");
 	});
 	// 重写console.error
 	const oldError = console.error;
 	console.error = function (e) {
 		let defaults = Object.assign({}, errorInfo);
-		setTimeout(function () {
+		setTimeout(() => {
 			defaults.type = "console";
 			defaults.data = {
 				stack: e
 			};
 			conf.errorList.push(defaults);
-			if (conf.page === location.href) reportData(opt, "error");
+			reportData(opt, "error2");
 		}, 0);
 		return oldError.apply(console, arguments);
 	};
@@ -129,8 +109,9 @@ export function proxyXhr(opt) {
 
 	const xhrProto = XMLHttpRequest.prototype;
 	const origOpen = xhrProto.open;
-	xhrProto.open = function (_, url) {
-		// 拿到请求地址
+	xhrProto.open = function (method, url) {
+		// 拿到请求方法和地址
+		this._method = method;
 		this._url = url;
 		return origOpen.apply(this, arguments);
 	};
@@ -148,21 +129,19 @@ export function proxyXhr(opt) {
 		return realXHR;
 	}
 
+	let startTime = 0;
+	let gapTime = 0;
 	window.XMLHttpRequest = newXHR;
 	window.addEventListener("xhrReadyStateChange", function (e) {
 		const xhr = e.detail;
 		const status = xhr.status;
 		const readyState = xhr.readyState;
-		let startTime = 0;
-		let gapTime = 0;
 		if (readyState === 1) {
 			startTime = new Date().getTime();
 		}
-		if (readyState === 4) {
-			gapTime = new Date().getTime() - startTime;
-		}
 
 		if (readyState === 4) {
+			gapTime = new Date().getTime() - startTime;
 			// 解决IE不支持xhr.responseURL
 			if (!xhr.responseURL) {
 				xhr.responseURL = xhr._url;
@@ -174,10 +153,11 @@ export function proxyXhr(opt) {
 			if (result) return false;
 
 			let defaults = Object.assign({}, requestInfo);
-			if (status !== 200 && status !== 401) {
+			if (status !== 200 && status !== 304 && status !== 401) {
 				// 接口异常时捕获异常接口响应
 				defaults.responseMsg = xhr.responseText;
 			}
+			defaults.method = xhr._method;
 			defaults.url = xhr.responseURL;
 			defaults.statusCode = xhr.status;
 			defaults.timeConsuming = gapTime;
@@ -189,55 +169,59 @@ export function proxyXhr(opt) {
 }
 
 // 拦截fetch请求
-export function proxyFetch() {
+export function proxyFetch(opt) {
 	if (!window.fetch) return;
 	const oldFetch = fetch;
 	window.fetch = function () {
-		const _arg = arguments;
-		const result = fetArg(_arg);
-		if (result.type !== "report-data") {
-			clearPerformance();
-			const url = result.url ? result.url.split("?")[0] : "";
-			conf.ajaxMsg[url] = result;
-			conf.fetLength = conf.fetLength + 1;
-			conf.haveFetch = true;
-		}
+		const result = formatFetchArguments(arguments);
 		const fetchStartTime = new Date().getTime();
 		return oldFetch
 			.apply(this, arguments)
 			.then(res => {
-				if (result.type === "report-data") return res;
 				try {
-					const url = res.url ? res.url.split("?")[0] : "";
-					res
-						.clone()
-						.text()
-						.then(data => {
-							if (conf.ajaxMsg[url]) conf.ajaxMsg[url]["decodedBodySize"] = data.length;
-						});
+					result.statusCode = res.status;
+					result.timeConsuming = new Date().getTime() - fetchStartTime;
+					if (res.status !== 200 && res.status !== 304 && res.status !== 401) {
+						res
+							.clone()
+							.text()
+							.then(res => {
+								result.responseMsg = res;
+							});
+					}
+					conf.requestList.push(result);
+					reportData(opt, "request");
 				} catch (e) {}
-				getFetchTime(fetchStartTime);
 				return res;
 			})
 			.catch(err => {
-				if (result.type === "report-data") return;
-				getFetchTime(fetchStartTime);
-				//error
-				let defaults = Object.assign({}, errorInfo);
-				defaults.time = new Date().getTime();
-				defaults.type = "fetch";
-				defaults.msg = "fetch request error";
-				defaults.method = result.method;
-				// defaults.errorPageUrl =
-				defaults.data = {
-					resourceUrl: result.url,
-					text: err.stack || err,
-					status: 0
-				};
-				conf.errorList.push(defaults);
-				return err;
+				//当网络故障时或请求被阻止时，才会标记为 reject
+				console.log(err);
 			});
 	};
+
+	// 规范化fetch上报内容
+	function formatFetchArguments(arg) {
+		let defaults = Object.assign({}, requestInfo);
+		let args = Array.from(arg);
+
+		if (!args || !args.length) return requestInfo;
+		try {
+			const result = args[0];
+			if (args.length === 1) {
+				if (typeof result === "string") {
+					defaults.url = result ? result.split("?")[0] : "";
+				} else if (typeof result === "object") {
+					defaults.url = result.url ? result.url.split("?")[0] : "";
+					defaults.method = result.method;
+				}
+			} else {
+				defaults.url = result.split("?")[0];
+				defaults.method = args[1].method || "GET";
+			}
+		} catch (err) {}
+		return defaults;
+	}
 }
 
 // 统计页面性能

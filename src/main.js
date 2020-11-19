@@ -5,7 +5,7 @@ import polyfill from "./polyfill.js";
 polyfill();
 
 function main(option) {
-	let filterUrl = ["livereload.js?snipver=1", "/sockjs-node/", "/api/report"];
+	let filterUrl = ["livereload.js?snipver=1", "/sockjs-node/", "/dev-server/", "/api/report"];
 	let opt = {
 		// 上报地址
 		domain: "http://localhost/api",
@@ -30,7 +30,7 @@ function main(option) {
 	opt.filterUrl = opt.filterUrl.concat(filterUrl);
 
 	// error上报
-	if (opt.isReportError) captureError();
+	if (opt.isReportError) captureError(opt);
 
 	// 非SPA上报页面性能数据
 	if (!opt.isSPA) {

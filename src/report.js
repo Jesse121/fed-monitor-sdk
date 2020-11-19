@@ -15,17 +15,12 @@ function getPlatform() {
 	}
 }
 
-function clear(type) {
+export function clear() {
 	if (window.performance && window.performance.clearResourceTimings) performance.clearResourceTimings();
 	conf.performance = {};
 	conf.errorList = [];
 	conf.requestList = [];
-	conf.preUrl = "";
 	conf.resourceList = [];
-	conf.page = type === 0 ? location.href : "";
-	conf.haveAjax = false;
-	conf.haveFetch = false;
-	conf.ajaxMsg = {};
 	main.ERRORLIST = [];
 	main.ADDDATA = {};
 }
@@ -76,7 +71,7 @@ export function reportData(opt, type) {
 		}
 		// 清空无关数据
 		Promise.resolve().then(() => {
-			clear(0);
+			clear();
 		});
 	}, opt.delay);
 }
