@@ -6,10 +6,10 @@ export default {
 	output: {
 		file: "dist/monitor.js",
 		name: "monitor",
-		format: "iife"
+		exports: "default"
 	},
 	plugins: [
-		// uglify(),
+		process.env.NODE_ENV === "production" && uglify(),
 		babel({
 			exclude: "node_modules/**"
 		})
