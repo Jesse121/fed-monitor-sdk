@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "main.js",
 	"scripts": {
-		"dev": "cross-env NODE_ENV=development rollup -c -w",
+		"dev": "cross-env NODE_ENV=development rollup -c -f iife -w",
 		"build:iife": "cross-env NODE_ENV=production rollup -c -f iife -o dist/monitor.iife.js",
 		"build:cjs": "cross-env NODE_ENV=production rollup -c -f cjs -o dist/monitor.cjs.js",
 		"build": "yarn build:iife && yarn build:cjs",
