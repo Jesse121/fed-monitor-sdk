@@ -22,7 +22,7 @@
 
 ### 配置项
 
-```js
+```ts
 {
   	// 上报地址
 		domain: "http://localhost/api",
@@ -38,10 +38,10 @@
 		isReportApiRequest: true,
 		// 请求时需要过滤的url信息
 		filterUrl: [],
+		// 其他上报
+    otherData: []
 		// 支持特殊自定义上报方式
 		fn: null,
-		// 其他上报
-		add: {}
 }
 
 ```
