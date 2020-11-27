@@ -1,6 +1,6 @@
 import main from "./main";
 import { getPerformance, conf } from "./capture";
-import { IoptionsConfig, IreportDataInfo } from "./interface";
+import { IOptionsConfig, IReportDataInfo } from "./interface";
 
 // 暂时只区分PC和H5
 function getPlatform(): string {
@@ -40,38 +40,45 @@ export function clear(): void {
 // performance:页面级性能上报
 // request:接口性能上报
 // error：页面错误信息上报
-export function reportData(opt: IoptionsConfig, type: string): void {
+export function reportData(opt: IOptionsConfig, type: string): void {
   setTimeout(() => {
     if (main.errorList && main.errorList.length > 0) {
       conf.errorList = conf.errorList.concat(main.errorList);
     }
-    let result: IreportDataInfo = {
+    let result: IReportDataInfo = {
       platform: getPlatform(),
       UA: navigator.userAgent,
       url: location.href,
       errorList: [],
     };
 
-    if (type === "performance") {
-      if (opt.isReportPerformance) getPerformance();
-      result = Object.assign(result, {
-        // preUrl: conf.preUrl,
-        performance: conf.performance,
-        requestList: conf.requestList,
-      });
-    } else if (type === "request") {
-      if (conf.requestList && conf.requestList.length === 0) return false;
-      result = Object.assign(result, {
-        requestList: conf.requestList,
-      });
-    } else if (type === "addData") {
-      result = Object.assign(result, {
-        otherData: main.otherData,
-      });
+    switch (type) {
+      case "performance":
+        if (opt.isReportPerformance) getPerformance();
+        result = Object.assign(result, {
+          // preUrl: conf.preUrl,
+          performance: conf.performance,
+          requestList: conf.requestList,
+        });
+        break;
+      case "request":
+        if (conf.requestList && conf.requestList.length === 0) return false;
+        result = Object.assign(result, {
+          requestList: conf.requestList,
+        });
+        break;
+      case "addData":
+        result = Object.assign(result, {
+          otherData: main.otherData,
+        });
+        break;
+      case "error":
+        if (conf.errorList && conf.errorList.length === 0) return false;
+        result = Object.assign(result, {
+          errorList: conf.errorList,
+        });
+        break;
     }
-    result = Object.assign(result, {
-      errorList: conf.errorList,
-    });
 
     opt.fn && opt.fn(result);
     if (!opt.fn && navigator.sendBeacon) {
@@ -91,7 +98,7 @@ export function reportData(opt: IoptionsConfig, type: string): void {
   }, opt.delay);
 }
 // 用于sendBeacon 降级支持
-function xhrReportData(url: string, data: IreportDataInfo) {
+function xhrReportData(url: string, data: IReportDataInfo) {
   const xhr = new XMLHttpRequest();
   xhr.open("POST", url, true);
   xhr.send(JSON.stringify(data));

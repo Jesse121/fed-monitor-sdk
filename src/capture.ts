@@ -1,13 +1,13 @@
 import { reportData } from "./report";
 import {
-  IoptionsConfig,
-  IerrorInfo,
-  IrequestInfo,
-  IreportDataInfo,
+  IOptionsConfig,
+  IErrorInfo,
+  IRequestInfo,
+  IReportDataInfo,
 } from "./interface";
 
 // error default
-const errorInfo: IerrorInfo = {
+const errorInfo: IErrorInfo = {
   type: "",
   data: {
     msg: "",
@@ -15,7 +15,7 @@ const errorInfo: IerrorInfo = {
   },
 };
 
-const requestInfo: IrequestInfo = {
+const requestInfo: IRequestInfo = {
   method: "",
   url: "",
   statusCode: 0,
@@ -23,7 +23,7 @@ const requestInfo: IrequestInfo = {
   responseMsg: "",
 };
 
-export const conf: IreportDataInfo = {
+export const conf: IReportDataInfo = {
   platform: "",
   UA: "",
   url: "",
@@ -47,7 +47,7 @@ export const conf: IreportDataInfo = {
 };
 
 // 捕获error信息
-export function captureError(opt: IoptionsConfig): void {
+export function captureError(opt: IOptionsConfig): void {
   // 捕获资源加载错误
   window.addEventListener(
     "error",
@@ -83,22 +83,25 @@ export function captureError(opt: IoptionsConfig): void {
   // 捕获未处理的reject
   window.addEventListener("unhandledrejection", function (e) {
     const error = e && e.reason;
-    const message = error.message || "";
+    const message = error.message || error || "";
     const stack = error.stack || "";
     // Processing error
     let col = 0;
     let line = 0;
-    let errs = stack.match(/\(.+?\)/);
-    if (errs && errs.length) errs = errs[0];
-    // errs = errs.replace(/\w.+[js|html]/g, $1 => {
-    // 	resourceUrl = $1;
-    // 	return "";
-    // });
-    errs = errs.split(":");
-    if (errs && errs.length > 1) {
-      line = parseInt(errs[1] || 0);
+    if (stack) {
+      let errs = stack.match(/\(.+?\)/);
+      if (errs && errs.length) errs = errs[0];
+      // errs = errs.replace(/\w.+[js|html]/g, $1 => {
+      // 	resourceUrl = $1;
+      // 	return "";
+      // });
+      errs = errs.split(":");
+      if (errs && errs.length > 1) {
+        line = parseInt(errs[1] || 0);
+      }
+      col = parseInt(errs[2] || 0);
     }
-    col = parseInt(errs[2] || 0);
+
     const defaults = Object.assign({}, errorInfo);
     defaults.type = "unhandledrejection";
     defaults.data = {
@@ -109,24 +112,25 @@ export function captureError(opt: IoptionsConfig): void {
     conf.errorList.push(defaults);
     reportData(opt, "error");
   });
-  // 重写console.error
-  const oldError = console.error;
+
+  // 重写console.error 包括代码中的错误和浏览器抛出的错误
+  // const oldError = console.error;
   console.error = function (e: any) {
     const defaults = Object.assign({}, errorInfo);
     setTimeout(() => {
       defaults.type = "console";
       defaults.data = {
-        msg: e,
+        msg: e.message ? e.message : e,
       };
       conf.errorList.push(defaults);
       reportData(opt, "error");
     }, 0);
-    return oldError.apply(console, [e]);
+    // return oldError.apply(console, [e]);
   };
 }
 
 // 拦截xhr请求
-export function proxyXhr(opt: IoptionsConfig): void {
+export function proxyXhr(opt: IOptionsConfig): void {
   function xhrEventTrigger(this: any, event) {
     const xhrEvent = new CustomEvent(event, { detail: this });
     window.dispatchEvent(xhrEvent);
@@ -167,10 +171,7 @@ export function proxyXhr(opt: IoptionsConfig): void {
 
     if (readyState === 4) {
       gapTime = new Date().getTime() - startTime;
-      // 解决IE不支持xhr.responseURL
-      if (!xhr.responseURL) {
-        xhr.responseURL = xhr._url;
-      }
+
       // 过滤请求
       const result =
         opt.filterUrl &&
@@ -185,7 +186,7 @@ export function proxyXhr(opt: IoptionsConfig): void {
         defaults.responseMsg = xhr.responseText;
       }
       defaults.method = xhr._method;
-      defaults.url = xhr.responseURL;
+      defaults.url = xhr.responseURL || xhr._url;
       defaults.statusCode = xhr.status;
       defaults.timeConsuming = gapTime;
       conf.requestList && conf.requestList.push(defaults);
@@ -196,7 +197,7 @@ export function proxyXhr(opt: IoptionsConfig): void {
 }
 
 // 拦截fetch请求
-export function proxyFetch(opt: IoptionsConfig): void {
+export function proxyFetch(opt: IOptionsConfig): void {
   if (!window.fetch) return;
   const oldFetch = fetch;
   window.fetch = function (...args) {

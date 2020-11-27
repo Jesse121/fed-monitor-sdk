@@ -5,7 +5,7 @@
  * @export
  * @interface optionsConfig
  */
-export interface IoptionsConfig {
+export interface IOptionsConfig {
   domain: string;
   delay?: number;
   isSPA?: boolean;
@@ -24,14 +24,14 @@ export interface IoptionsConfig {
  * @export
  * @interface reportDataInfo
  */
-export interface IreportDataInfo {
+export interface IReportDataInfo {
   // addData: Record<string, unknown>;
   platform: string;
   UA: string;
   url: string;
-  errorList: Array<IerrorInfo>;
-  performance?: IperformanceInfo;
-  requestList?: Array<IrequestInfo>;
+  errorList: Array<IErrorInfo>;
+  performance?: IPerformanceInfo;
+  requestList?: Array<IRequestInfo>;
 }
 
 /**
@@ -41,7 +41,7 @@ export interface IreportDataInfo {
  * @export
  * @interface errorInfo
  */
-export interface IerrorInfo {
+export interface IErrorInfo {
   type: string;
   data: {
     msg?: string | Event; // 错误提示
@@ -58,7 +58,7 @@ export interface IerrorInfo {
  * @export
  * @interface performanceInfo
  */
-export interface IperformanceInfo {
+export interface IPerformanceInfo {
   // DNS解析时间
   dnst: number;
   //TCP建立时间
@@ -88,7 +88,7 @@ export interface IperformanceInfo {
  * @export
  * @interface requestInfo
  */
-export interface IrequestInfo {
+export interface IRequestInfo {
   method: string;
   url: string;
   statusCode: number;

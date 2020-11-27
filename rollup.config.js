@@ -8,7 +8,7 @@ export default {
   input: "src/main.ts",
   output: [
     {
-      file: "dist/monitor.js",
+      file: "../fe-monitor-server/src/public/monitor.js",
       name: "monitor",
       format: "iife",
     },

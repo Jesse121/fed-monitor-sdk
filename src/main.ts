@@ -1,11 +1,11 @@
 import { captureError, proxyFetch, proxyXhr } from "./capture";
 import { reportData } from "./report";
 import polyfill from "./polyfill.js";
-import { IoptionsConfig, IerrorInfo } from "./interface";
+import { IOptionsConfig, IErrorInfo } from "./interface";
 
 polyfill();
 
-function main(option: IoptionsConfig): void {
+function main(option: IOptionsConfig): void {
   const filterUrl = [
     "/livereload.js?snipver=1",
     "/sockjs-node/",
@@ -68,7 +68,7 @@ function main(option: IoptionsConfig): void {
 
 // 提供给第三方上报错误信息
 main.errorList = [];
-main.addError = function (err: IerrorInfo) {
+main.addError = function (err: IErrorInfo) {
   err = {
     type: err.type,
     data: {
