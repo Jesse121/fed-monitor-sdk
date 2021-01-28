@@ -16,9 +16,10 @@
     "baseUrl": ".",
     "outDir": "./dist",
     "esModuleInterop": true,
-    "typeRoots": ["./types", "./node_modules/@types"],
+    "typeRoots": ["src/types", "./node_modules/@types"],
     "moduleResolution": "node",
     "resolveJsonModule": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "src/@types/**/*"]
 }
