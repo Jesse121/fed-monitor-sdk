@@ -26,7 +26,7 @@ function main(option: IOptionsConfig): void {
     // 请求时需要过滤的url信息
     filterUrl: [""],
     // 是否上报请求接口性能数据
-    isReportApiRequest: true,
+    isReportApiRequest: false,
     // 其他数据上报
     add: [],
     // 支持特殊自定义上报方式
@@ -56,7 +56,7 @@ function main(option: IOptionsConfig): void {
     proxyXhr(opt);
   }
 
-  // 建听用户是否离开页面，离开时将未上报的数据进行上报
+  // 监听用户是否离开页面，离开时将未上报的数据进行上报
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
       if (main.otherData.length > 0 || main.errorList.length > 0) {

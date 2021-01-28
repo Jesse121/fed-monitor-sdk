@@ -1,5 +1,5 @@
 {
-  "name": "fe-monitor-sdk",
+  "name": "@gtlmjs/fe-monitor-sdk",
   "version": "1.1.0",
   "description": "An SDK for front-end monitoring escalation",
   "main": "main.js",
