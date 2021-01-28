@@ -5,7 +5,6 @@
     "lib": ["dom", "esnext"],
     "removeComments": false,
     "declaration": true,
-    "declarationDir": "dist",
     "sourceMap": true,
 
     /* 强类型检查配置 */
@@ -16,10 +15,8 @@
     "baseUrl": ".",
     "outDir": "./dist",
     "esModuleInterop": true,
-    "typeRoots": ["src/types", "./node_modules/@types"],
     "moduleResolution": "node",
     "resolveJsonModule": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "src/@types/**/*"]
+  "include": ["src"]
 }
