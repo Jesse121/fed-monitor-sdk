@@ -2,7 +2,7 @@
   "name": "@gtlmjs/fe-monitor-sdk",
   "version": "1.1.0",
   "description": "An SDK for front-end monitoring escalation",
-  "main": "main.js",
+  "main": "main.ts",
   "scripts": {
     "dev": "cross-env NODE_ENV=development rollup -c  -w",
     "build:iife": "cross-env NODE_ENV=production rollup -c -f iife -o dist/monitor.iife.js",
