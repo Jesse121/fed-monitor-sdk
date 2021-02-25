@@ -976,6 +976,11 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@gtlmjs/prettier-config@^1.0.0":
+  version "1.0.0"
+  resolved "http://whrdd.f3322.net:8090/repository/npm-all/@gtlmjs/prettier-config/-/prettier-config-1.0.0.tgz#85fd9e9517e087ba76281a0167819ae49732bf57"
+  integrity sha512-UdwECJzqPGis21+Hv5rbNP+tiq9vpEH0u4WTVXkKm2j04krXOtl0IjkwQxw1z2Umm7V0AURZUr6i5jXlKUzRZA==
+
 "@koa/cors@^3.0.0":
   version "3.1.0"
   resolved "https://registry.npm.taobao.org/@koa/cors/download/@koa/cors-3.1.0.tgz#618bb073438cfdbd3ebd0e648a76e33b84f3a3b2"

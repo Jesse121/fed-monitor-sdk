@@ -1,48 +1,48 @@
 {
-  "name": "@gtlmjs/fe-monitor-sdk",
-  "version": "1.1.0",
-  "description": "An SDK for front-end monitoring escalation",
-  "main": "rsc/main.ts",
-  "scripts": {
-    "dev": "cross-env NODE_ENV=development rollup -c  -w",
-    "build:iife": "cross-env NODE_ENV=production rollup -c -f iife -o dist/monitor.iife.js",
-    "build:cjs": "cross-env NODE_ENV=production rollup -c -f cjs -o dist/monitor.cjs.js",
-    "build": "yarn build:iife && yarn build:cjs",
-    "release": "standard-version",
-    "serve": "ws --port 9001"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@git.rongsitech.com:yangdong/fed-monitor-sdk.git"
-  },
-  "author": "Jesse<jesse152@163.com>",
-  "license": "ISC",
-  "devDependencies": {
-    "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1",
-    "@commitlint/cli": "^11.0.0",
-    "@commitlint/config-conventional": "^11.0.0",
-    "@typescript-eslint/eslint-plugin": "^4.8.1",
-    "@typescript-eslint/parser": "^4.8.1",
-    "cross-env": "^7.0.2",
-    "eslint": "^7.13.0",
-    "husky": "^4.3.0",
-    "local-web-server": "^4.2.1",
-    "rollup": "^2.33.3",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-eslint": "^7.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-typescript2": "^0.29.0",
-    "rollup-plugin-uglify": "^6.0.4",
-    "standard-version": "^9.0.0",
-    "typescript": "^4.0.5"
-  },
-  "engines": {
-    "node": "14.15.1"
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  }
+	"name": "@gtlmjs/fe-monitor-sdk",
+	"version": "1.1.0",
+	"description": "An SDK for front-end monitoring escalation",
+	"main": "dist/monitor.js",
+	"scripts": {
+		"dev": "cross-env NODE_ENV=development rollup -c  -w",
+		"build": "cross-env NODE_ENV=production rollup -c -f cjs -o dist/monitor.js",
+		"release": "standard-version",
+		"serve": "ws --port 9001"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@git.rongsitech.com:yangdong/fed-monitor-sdk.git"
+	},
+	"prettier": "@gtlmjs/prettier-config",
+	"author": "Jesse<jesse152@163.com>",
+	"license": "ISC",
+	"devDependencies": {
+		"@babel/core": "^7.12.3",
+		"@babel/preset-env": "^7.12.1",
+		"@commitlint/cli": "^11.0.0",
+		"@commitlint/config-conventional": "^11.0.0",
+		"@gtlmjs/prettier-config": "^1.0.0",
+		"@typescript-eslint/eslint-plugin": "^4.8.1",
+		"@typescript-eslint/parser": "^4.8.1",
+		"cross-env": "^7.0.2",
+		"eslint": "^7.13.0",
+		"husky": "^4.3.0",
+		"local-web-server": "^4.2.1",
+		"rollup": "^2.33.3",
+		"rollup-plugin-babel": "^4.4.0",
+		"rollup-plugin-eslint": "^7.0.0",
+		"rollup-plugin-node-resolve": "^5.2.0",
+		"rollup-plugin-typescript2": "^0.29.0",
+		"rollup-plugin-uglify": "^6.0.4",
+		"standard-version": "^9.0.0",
+		"typescript": "^4.0.5"
+	},
+	"engines": {
+		"node": "14.15.1"
+	},
+	"husky": {
+		"hooks": {
+			"commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+		}
+	}
 }
